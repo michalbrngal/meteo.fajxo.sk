@@ -1,0 +1,10 @@
+# Protect sensitive files
+<FilesMatch "^(config\.php)$">
+    Require all denied
+</FilesMatch>
+
+# Protect cache directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^cache/ - [F,L]
+</IfModule>

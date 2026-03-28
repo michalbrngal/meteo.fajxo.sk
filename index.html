@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteostanica Sýnin — Pezinok</title>
+  <meta name="description" content="Osobná meteostanica Sýnin v Pezinku. Aktuálne počasie, teplota, vlhkosť, vietor, zrážky a ďalšie meteorologické údaje.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-bg: #0b1120;
+      --color-surface: #131b2e;
+      --color-surface-hover: #1a2540;
+      --color-border: #1e2d4a;
+      --color-text: #e2e8f0;
+      --color-text-muted: #94a3b8;
+      --color-accent: #38bdf8;
+      --color-accent-glow: rgba(56, 189, 248, 0.15);
+      --radius: 16px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+      animation: drift 20s ease-in-out infinite alternate;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-5%, 3%); }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+
+    .header__icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .header__title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #e2e8f0, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .header__location {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .header__location svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--color-accent);
+      flex-shrink: 0;
+    }
+
+    .header__coords {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      opacity: 0.6;
+      margin-top: 0.4rem;
+      font-weight: 300;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+      margin: 1.5rem 0 2.5rem;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      margin-bottom: 1.25rem;
+      padding-left: 0.25rem;
+    }
+
+    /* Weather service cards */
+    .services {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .service-card {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--card-color, var(--color-accent-glow)), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .service-card:hover {
+      border-color: var(--card-border, var(--color-accent));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .service-card:hover::before {
+      opacity: 1;
+    }
+
+    .service-card__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      background: var(--icon-bg, rgba(56, 189, 248, 0.12));
+    }
+
+    .service-card__content {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .service-card__name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .service-card__desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+
+    .service-card__arrow {
+      position: relative;
+      z-index: 1;
+      color: var(--color-text-muted);
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .service-card__arrow svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .service-card:hover .service-card__arrow {
+      color: var(--color-text);
+      transform: translateX(3px);
+    }
+
+    /* Card color themes */
+    .service-card--weathercloud {
+      --card-color: rgba(0, 172, 237, 0.08);
+      --card-border: #00aced;
+      --icon-bg: rgba(0, 172, 237, 0.12);
+    }
+
+    .service-card--wunderground {
+      --card-color: rgba(50, 167, 79, 0.08);
+      --card-border: #32a74f;
+      --icon-bg: rgba(50, 167, 79, 0.12);
+    }
+
+    .service-card--windy {
+      --card-color: rgba(255, 87, 51, 0.08);
+      --card-border: #ff5733;
+      --icon-bg: rgba(255, 87, 51, 0.12);
+    }
+
+    .service-card--ecowitt {
+      --card-color: rgba(0, 200, 83, 0.08);
+      --card-border: #00c853;
+      --icon-bg: rgba(0, 200, 83, 0.12);
+    }
+
+    /* Current conditions */
+    .conditions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .condition-card {
+      padding: 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .condition-card--primary {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--color-surface), #1a2540);
+      border-color: var(--color-border);
+    }
+
+    .condition-card--primary .condition-card__value {
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #e2e8f0, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .condition-card--primary .condition-card__unit {
+      font-size: 1.5rem;
+      -webkit-text-fill-color: var(--color-text-muted);
+    }
+
+    .condition-card--primary .condition-card__label {
+      font-size: 0.9rem;
+    }
+
+    .condition-card--primary .condition-card__icon {
+      font-size: 3rem;
+    }
+
+    .temp-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .condition-card__icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .condition-card__value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .condition-card__unit {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      font-weight: 400;
+    }
+
+    .condition-card__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+
+    .condition-card__minmax {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .condition-card__min {
+      color: #60a5fa;
+    }
+
+    .condition-card__max {
+      color: #f87171;
+    }
+
+    .condition-card__aqi {
+      display: inline-block;
+      margin-top: 0.4rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .aqi-good { background: rgba(0, 200, 83, 0.15); color: #00c853; }
+    .aqi-moderate { background: rgba(255, 214, 0, 0.15); color: #ffd600; }
+    .aqi-sensitive { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
+    .aqi-unhealthy { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+    .aqi-very-unhealthy { background: rgba(156, 39, 176, 0.15); color: #9c27b0; }
+    .aqi-hazardous { background: rgba(121, 27, 47, 0.15); color: #791b2f; }
+
+    .conditions-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+    }
+
+    .conditions-error {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+    }
+
+    .conditions-error a {
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+
+    .conditions-error a:hover {
+      text-decoration: underline;
+    }
+
+    .updated-time {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      opacity: 0.6;
+      margin-top: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .conditions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .condition-card--primary {
+        grid-column: 1 / -1;
+        gap: 1.25rem;
+        padding: 1.5rem;
+      }
+
+      .condition-card--primary .condition-card__value {
+        font-size: 2.5rem;
+      }
+
+      .condition-card--primary .condition-card__icon {
+        font-size: 2.25rem;
+      }
+    }
+
+    /* Station info */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .info-card {
+      padding: 1rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+    }
+
+    .info-card__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+    }
+
+    .info-card__value {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+
+      .header {
+        padding: 2rem 0 1.5rem;
+      }
+
+      .header__title {
+        font-size: 2rem;
+      }
+
+      .service-card {
+        padding: 1rem 1.25rem;
+        gap: 1rem;
+      }
+
+      .service-card__icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <span class="header__icon" aria-hidden="true">🌤️</span>
+      <h1 class="header__title">Meteostanica Sýnin</h1>
+      <p class="header__location">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
+        Pezinok, Slovensko
+      </p>
+      <p class="header__coords">48°18'06" N &nbsp; 17°16'06" E &nbsp;·&nbsp; 220 m n. m.</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <section>
+      <h2 class="section-title">Aktuálne podmienky</h2>
+      <div class="conditions" id="conditions">
+        <div class="conditions-loading" id="conditions-loading">Načítavam dáta zo senzorov…</div>
+      </div>
+      <div class="updated-time" id="updated-time"></div>
+    </section>
+
+    <div class="divider" style="margin-top: 2.5rem;"></div>
+
+    <section>
+      <h2 class="section-title">Živé dáta na meteorologických portáloch</h2>
+      <div class="services">
+
+        <a href="https://app.weathercloud.net/d4667886278#profile"
+           class="service-card service-card--weathercloud"
+           target="_blank" rel="noopener noreferrer">
+          <div class="service-card__icon">☁️</div>
+          <div class="service-card__content">
+            <div class="service-card__name">Weathercloud</div>
+            <div class="service-card__desc">Prehľadné vizualizácie, grafy a profil stanice</div>
+          </div>
+          <span class="service-card__arrow">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </span>
+        </a>
+
+        <a href="https://www.wunderground.com/dashboard/pws/IPEZIN32"
+           class="service-card service-card--wunderground"
+           target="_blank" rel="noopener noreferrer">
+          <div class="service-card__icon">🌍</div>
+          <div class="service-card__content">
+            <div class="service-card__name">Weather Underground</div>
+            <div class="service-card__desc">Aktuálne podmienky, história a detailné štatistiky</div>
+          </div>
+          <span class="service-card__arrow">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </span>
+        </a>
+
+        <a href="https://www.windy.com/station/pws-0GzZW7bF?47.476,17.268,8,p"
+           class="service-card service-card--windy"
+           target="_blank" rel="noopener noreferrer">
+          <div class="service-card__icon">🌬️</div>
+          <div class="service-card__content">
+            <div class="service-card__name">Windy</div>
+            <div class="service-card__desc">Interaktívna mapa vetra, predpoveď a radarové snímky</div>
+          </div>
+          <span class="service-card__arrow">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </span>
+        </a>
+
+        <a href="https://www.ecowitt.net/home/share?authorize=3JFD9G"
+           class="service-card service-card--ecowitt"
+           target="_blank" rel="noopener noreferrer">
+          <div class="service-card__icon">📊</div>
+          <div class="service-card__content">
+            <div class="service-card__name">Ecowitt</div>
+            <div class="service-card__desc">Kompletný dashboard so všetkými senzormi stanice</div>
+          </div>
+          <span class="service-card__arrow">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </span>
+        </a>
+
+      </div>
+    </section>
+
+    <div class="divider" style="margin-top: 2.5rem;"></div>
+
+    <section>
+      <h2 class="section-title">O stanici</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card__label">Názov</div>
+          <div class="info-card__value">Sýnin</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card__label">Lokalita</div>
+          <div class="info-card__value">Pezinok</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card__label">Nadmorská výška</div>
+          <div class="info-card__value">220 m n. m.</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card__label">Kraj</div>
+          <div class="info-card__value">Bratislavský</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>meteo.fajxo.sk · Osobná meteostanica Sýnin · Pezinok, Slovensko</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var ECOWITT_SHARE = 'https://www.ecowitt.net/home/share?authorize=3JFD9G';
+      var container = document.getElementById('conditions');
+      var updatedEl = document.getElementById('updated-time');
+
+      function val(v, decimals) {
+        if (v === null || v === undefined) return '—';
+        return decimals !== undefined ? Number(v).toFixed(decimals) : v;
+      }
+
+      function renderConditions(w, eco) {
+        container.innerHTML =
+          '<div class="condition-card condition-card--primary">' +
+            '<span class="condition-card__icon" aria-hidden="true">' + getWeatherEmoji(w.temp) + '</span>' +
+            '<div class="temp-group">' +
+              '<div class="condition-card__value">' + val(w.temp, 1) + '<span class="condition-card__unit">°C</span></div>' +
+              '<div class="condition-card__label">Teplota</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">💧</div>' +
+            '<div class="condition-card__value">' + val(w.humidity) + '<span class="condition-card__unit">%</span></div>' +
+            '<div class="condition-card__label">Vlhkosť</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🌡️</div>' +
+            '<div class="condition-card__value">' + val(w.dewpt, 1) + '<span class="condition-card__unit">°C</span></div>' +
+            '<div class="condition-card__label">Rosný bod</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🌡️</div>' +
+            '<div class="condition-card__value">' + val(w.windChill, 1) + '<span class="condition-card__unit">°C</span></div>' +
+            '<div class="condition-card__label">Pocitová</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🌬️</div>' +
+            '<div class="condition-card__value">' + val(w.windSpeed, 1) + '<span class="condition-card__unit"> km/h</span></div>' +
+            '<div class="condition-card__label">Vietor</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">💨</div>' +
+            '<div class="condition-card__value">' + val(w.windGust, 1) + '<span class="condition-card__unit"> km/h</span></div>' +
+            '<div class="condition-card__label">Nárazy</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🧭</div>' +
+            '<div class="condition-card__value">' + (w.winddir !== null ? degreesToCompass(w.winddir) : '—') + '</div>' +
+            '<div class="condition-card__label">Smer vetra</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">📊</div>' +
+            '<div class="condition-card__value">' + val(w.pressure, 1) + '<span class="condition-card__unit"> hPa</span></div>' +
+            '<div class="condition-card__label">Tlak</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🌧️</div>' +
+            '<div class="condition-card__value">' + val(w.precipTotal, 1) + '<span class="condition-card__unit"> mm</span></div>' +
+            '<div class="condition-card__label">Zrážky dnes</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">☀️</div>' +
+            '<div class="condition-card__value">' + val(w.solarRadiation, 0) + '<span class="condition-card__unit"> W/m²</span></div>' +
+            '<div class="condition-card__label">Slnečné žiar.</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🔆</div>' +
+            '<div class="condition-card__value">' + val(w.uv) + '</div>' +
+            '<div class="condition-card__label">UV index</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🫁</div>' +
+            '<div class="condition-card__value">' + renderPm25Value(eco) + '</div>' +
+            '<div class="condition-card__label">PM2.5</div>' +
+            renderPm25Aqi(eco) +
+          '</div>';
+
+        if (w.obsTimeLocal) {
+          var obsDate = new Date(w.obsTimeLocal);
+          updatedEl.textContent = 'Aktualizované: ' + obsDate.toLocaleString('sk-SK', {
+            day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
+        }
+      }
+
+      function renderPm25Value(eco) {
+        if (!eco || eco.pm25 === null || eco.pm25 === undefined) {
+          return '—<span class="condition-card__unit"> µg/m³</span>';
+        }
+        return Number(eco.pm25).toFixed(1) + '<span class="condition-card__unit"> µg/m³</span>';
+      }
+
+      function renderPm25Aqi(eco) {
+        if (!eco || eco.pm25 === null || eco.pm25 === undefined) return '';
+        var aqi = pm25ToAqi(eco.pm25);
+        var cat = aqiCategory(aqi);
+        return '<div class="condition-card__aqi ' + cat.cls + '">AQI ' + aqi + ' · ' + cat.label + '</div>';
+      }
+
+      function renderError() {
+        container.innerHTML =
+          '<div class="conditions-error">' +
+            'Nepodarilo sa načítať aktuálne dáta.<br>' +
+            'Pozrite si živé údaje na <a href="' + ECOWITT_SHARE + '" target="_blank" rel="noopener noreferrer">Ecowitt dashboarde</a>.' +
+          '</div>';
+      }
+
+      function getWeatherEmoji(temp) {
+        if (temp === null) return '🌡️';
+        if (temp <= -10) return '🥶';
+        if (temp <= 0) return '❄️';
+        if (temp <= 10) return '🌤️';
+        if (temp <= 20) return '⛅';
+        if (temp <= 30) return '☀️';
+        return '🔥';
+      }
+
+      function degreesToCompass(deg) {
+        var dirs = ['S', 'SSV', 'SV', 'VSV', 'V', 'VJV', 'JV', 'JJV',
+                    'J', 'JJZ', 'JZ', 'ZJZ', 'Z', 'ZSZ', 'SZ', 'SSZ'];
+        return dirs[Math.round(deg / 22.5) % 16];
+      }
+
+      function pm25ToAqi(pm) {
+        var bp = [
+          [0, 12, 0, 50], [12.1, 35.4, 51, 100], [35.5, 55.4, 101, 150],
+          [55.5, 150.4, 151, 200], [150.5, 250.4, 201, 300], [250.5, 500.4, 301, 500]
+        ];
+        for (var k = 0; k < bp.length; k++) {
+          if (pm >= bp[k][0] && pm <= bp[k][1]) {
+            return Math.round((bp[k][3] - bp[k][2]) / (bp[k][1] - bp[k][0]) * (pm - bp[k][0]) + bp[k][2]);
+          }
+        }
+        return 500;
+      }
+
+      function aqiCategory(aqi) {
+        if (aqi <= 50) return { label: 'Dobrá', cls: 'aqi-good' };
+        if (aqi <= 100) return { label: 'Prijateľná', cls: 'aqi-moderate' };
+        if (aqi <= 150) return { label: 'Citlivé sk.', cls: 'aqi-sensitive' };
+        if (aqi <= 200) return { label: 'Nezdravá', cls: 'aqi-unhealthy' };
+        if (aqi <= 300) return { label: 'Veľmi nezdravá', cls: 'aqi-very-unhealthy' };
+        return { label: 'Nebezpečná', cls: 'aqi-hazardous' };
+      }
+
+      fetch('api.php')
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          if (!data.ok || !data.weather) throw new Error('no data');
+          renderConditions(data.weather, data.ecowitt);
+        })
+        .catch(renderError);
+    })();
+  </script>
+</body>
+</html>
