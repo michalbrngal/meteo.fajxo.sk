@@ -138,6 +138,7 @@ function fetchEcowitt(): ?array
 
     $result = [
         'temp'           => fToC($d['outdoor']['temperature']['value'] ?? null),
+        'wbgt'           => fToC($d['black_globe_temperature']['wbgt']['value'] ?? null),
         'humidity'       => isset($d['outdoor']['humidity']['value']) ? (int)$d['outdoor']['humidity']['value'] : null,
         'dewpt'          => fToC($d['outdoor']['dew_point']['value'] ?? null),
         'feelsLike'      => fToC($d['outdoor']['feels_like']['value'] ?? null),
