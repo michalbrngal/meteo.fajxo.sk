@@ -69,58 +69,43 @@ function cacheWrite(string $key, array $data): void
 }
 
 /**
- * Fetch current conditions from Weather Underground.
+ * Convert Fahrenheit to Celsius.
  */
-function fetchWeatherUnderground(): ?array
+function fToC(?string $f): ?float
 {
-    if (WU_API_KEY === '' || WU_STATION_ID === '') {
-        return null;
-    }
-
-    $cached = cacheRead('wu');
-    if ($cached !== null) {
-        return $cached;
-    }
-
-    $url = 'https://api.weather.com/v2/pws/observations/current'
-        . '?stationId=' . urlencode(WU_STATION_ID)
-        . '&format=json&units=m'
-        . '&apiKey=' . urlencode(WU_API_KEY);
-
-    $body = fetchUrl($url);
-    if ($body === null) {
-        return null;
-    }
-
-    $json = json_decode($body, true);
-    if (!is_array($json) || !isset($json['observations'][0])) {
-        return null;
-    }
-
-    $obs = $json['observations'][0];
-    $m = $obs['metric'] ?? [];
-
-    $result = [
-        'temp'           => $m['temp'] ?? null,
-        'humidity'       => $obs['humidity'] ?? null,
-        'dewpt'          => $m['dewpt'] ?? null,
-        'windChill'      => $m['windChill'] ?? null,
-        'windSpeed'      => $m['windSpeed'] ?? null,
-        'windGust'       => $m['windGust'] ?? null,
-        'winddir'        => $obs['winddir'] ?? null,
-        'pressure'       => $m['pressure'] ?? null,
-        'precipTotal'    => $m['precipTotal'] ?? null,
-        'solarRadiation' => $obs['solarRadiation'] ?? null,
-        'uv'             => $obs['uv'] ?? null,
-        'obsTimeLocal'   => $obs['obsTimeLocal'] ?? null,
-    ];
-
-    cacheWrite('wu', $result);
-    return $result;
+    if ($f === null) return null;
+    return round(((float)$f - 32) * 5 / 9, 1);
 }
 
 /**
- * Fetch PM2.5 (and optionally other sensors) from Ecowitt Open API.
+ * Convert mph to km/h.
+ */
+function mphToKmh(?string $mph): ?float
+{
+    if ($mph === null) return null;
+    return round((float)$mph * 1.60934, 1);
+}
+
+/**
+ * Convert inHg to hPa.
+ */
+function inHgToHpa(?string $inHg): ?float
+{
+    if ($inHg === null) return null;
+    return round((float)$inHg * 33.8639, 1);
+}
+
+/**
+ * Convert inches to mm.
+ */
+function inToMm(?string $in): ?float
+{
+    if ($in === null) return null;
+    return round((float)$in * 25.4, 1);
+}
+
+/**
+ * Fetch all sensor data from Ecowitt Open API.
  */
 function fetchEcowitt(): ?array
 {
@@ -137,7 +122,7 @@ function fetchEcowitt(): ?array
         . '?application_key=' . urlencode(ECOWITT_APP_KEY)
         . '&api_key=' . urlencode(ECOWITT_API_KEY)
         . '&mac=' . urlencode(ECOWITT_MAC)
-        . '&call_back=pm25_ch1';
+        . '&call_back=all';
 
     $body = fetchUrl($url);
     if ($body === null) {
@@ -149,26 +134,35 @@ function fetchEcowitt(): ?array
         return null;
     }
 
-    $pm25 = $json['data']['pm25_ch1']['pm25']['value'] ?? null;
-    $aqi = $json['data']['pm25_ch1']['real_time_aqi']['value'] ?? null;
+    $d = $json['data'];
 
     $result = [
-        'pm25' => $pm25 !== null ? (float)$pm25 : null,
-        'aqi'  => $aqi !== null ? (float)$aqi : null,
+        'temp'           => fToC($d['outdoor']['temperature']['value'] ?? null),
+        'humidity'       => isset($d['outdoor']['humidity']['value']) ? (int)$d['outdoor']['humidity']['value'] : null,
+        'dewpt'          => fToC($d['outdoor']['dew_point']['value'] ?? null),
+        'feelsLike'      => fToC($d['outdoor']['feels_like']['value'] ?? null),
+        'windSpeed'      => mphToKmh($d['wind']['wind_speed']['value'] ?? null),
+        'windGust'       => mphToKmh($d['wind']['wind_gust']['value'] ?? null),
+        'winddir'        => isset($d['wind']['wind_direction']['value']) ? (int)$d['wind']['wind_direction']['value'] : null,
+        'pressure'       => inHgToHpa($d['pressure']['relative']['value'] ?? null),
+        'precipTotal'    => inToMm($d['rainfall_piezo']['daily']['value'] ?? $d['rainfall']['daily']['value'] ?? null),
+        'solarRadiation' => isset($d['solar_and_uvi']['solar']['value']) ? (float)$d['solar_and_uvi']['solar']['value'] : null,
+        'uv'             => isset($d['solar_and_uvi']['uvi']['value']) ? (int)$d['solar_and_uvi']['uvi']['value'] : null,
+        'pm25'           => isset($d['pm25_ch1']['pm25']['value']) ? (float)$d['pm25_ch1']['pm25']['value'] : null,
+        'pm25aqi'        => isset($d['pm25_ch1']['real_time_aqi']['value']) ? (float)$d['pm25_ch1']['real_time_aqi']['value'] : null,
+        'obsTime'        => isset($d['outdoor']['temperature']['time']) ? (int)$d['outdoor']['temperature']['time'] : null,
     ];
 
     cacheWrite('ecowitt', $result);
     return $result;
 }
 
-// Build combined response
-$wu = fetchWeatherUnderground();
-$ecowitt = fetchEcowitt();
+// Build response
+$data = fetchEcowitt();
 
 $response = [
-    'ok'       => $wu !== null,
-    'weather'  => $wu,
-    'ecowitt'  => $ecowitt,
+    'ok'   => $data !== null,
+    'data' => $data,
 ];
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
