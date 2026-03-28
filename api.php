@@ -137,7 +137,7 @@ function fetchEcowitt(): ?array
         . '?application_key=' . urlencode(ECOWITT_APP_KEY)
         . '&api_key=' . urlencode(ECOWITT_API_KEY)
         . '&mac=' . urlencode(ECOWITT_MAC)
-        . '&call_back=outdoor.pm25';
+        . '&call_back=pm25_ch1';
 
     $body = fetchUrl($url);
     if ($body === null) {
@@ -149,10 +149,12 @@ function fetchEcowitt(): ?array
         return null;
     }
 
-    $pm25 = $json['data']['outdoor']['pm25']['real_time']['value'] ?? null;
+    $pm25 = $json['data']['pm25_ch1']['pm25']['value'] ?? null;
+    $aqi = $json['data']['pm25_ch1']['real_time_aqi']['value'] ?? null;
 
     $result = [
         'pm25' => $pm25 !== null ? (float)$pm25 : null,
+        'aqi'  => $aqi !== null ? (float)$aqi : null,
     ];
 
     cacheWrite('ecowitt', $result);

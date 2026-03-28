@@ -715,7 +715,7 @@
 
       function renderPm25Aqi(eco) {
         if (!eco || eco.pm25 === null || eco.pm25 === undefined) return '';
-        var aqi = pm25ToAqi(eco.pm25);
+        var aqi = (eco.aqi !== null && eco.aqi !== undefined) ? Math.round(eco.aqi) : pm25ToAqi(eco.pm25);
         var cat = aqiCategory(aqi);
         return '<div class="condition-card__aqi ' + cat.cls + '">AQI ' + aqi + ' · ' + cat.label + '</div>';
       }
