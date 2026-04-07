@@ -509,12 +509,12 @@
   <div class="container">
     <header class="header">
       <span class="header__icon" aria-hidden="true">🌤️</span>
-      <h1 class="header__title">Meteostanica Sýnin</h1>
-      <p class="header__location">
+      <h1 class="header__title" id="station-name"></h1>
+      <p class="header__location" id="station-location">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg>
-        Pezinok, Slovensko
+        <span id="station-location-text"></span>
       </p>
-      <p class="header__coords">48°18'06" N &nbsp; 17°16'06" E &nbsp;·&nbsp; 220 m n. m.</p>
+      <p class="header__coords" id="station-coords"></p>
       <p class="header__datetime" id="datetime"></p>
     </header>
 
@@ -530,95 +530,85 @@
 
     <div class="divider" style="margin-top: 2.5rem;"></div>
 
-    <section>
+    <section id="services-section" style="display:none">
       <h2 class="section-title">Živé dáta na meteorologických portáloch</h2>
-      <div class="services">
-
-        <a href="https://app.weathercloud.net/d4667886278#profile"
-           class="service-card service-card--weathercloud"
-           target="_blank" rel="noopener noreferrer">
-          <div class="service-card__icon">☁️</div>
-          <div class="service-card__content">
-            <div class="service-card__name">Weathercloud</div>
-          </div>
-          <span class="service-card__arrow">
-            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          </span>
-        </a>
-
-        <a href="https://www.wunderground.com/dashboard/pws/IPEZIN32"
-           class="service-card service-card--wunderground"
-           target="_blank" rel="noopener noreferrer">
-          <div class="service-card__icon">🌍</div>
-          <div class="service-card__content">
-            <div class="service-card__name">Weather Underground</div>
-          </div>
-          <span class="service-card__arrow">
-            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          </span>
-        </a>
-
-        <a href="https://www.windy.com/station/pws-0GzZW7bF?47.476,17.268,8,p"
-           class="service-card service-card--windy"
-           target="_blank" rel="noopener noreferrer">
-          <div class="service-card__icon">🌬️</div>
-          <div class="service-card__content">
-            <div class="service-card__name">Windy</div>
-          </div>
-          <span class="service-card__arrow">
-            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          </span>
-        </a>
-
-        <a href="https://www.ecowitt.net/home/share?authorize=3JFD9G"
-           class="service-card service-card--ecowitt"
-           target="_blank" rel="noopener noreferrer">
-          <div class="service-card__icon">📊</div>
-          <div class="service-card__content">
-            <div class="service-card__name">Ecowitt</div>
-          </div>
-          <span class="service-card__arrow">
-            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          </span>
-        </a>
-
-      </div>
+      <div class="services" id="services"></div>
     </section>
 
     <div class="divider" style="margin-top: 2.5rem;"></div>
 
     <section>
       <h2 class="section-title">O stanici</h2>
-      <div class="info-grid">
-        <div class="info-card">
-          <div class="info-card__label">Názov</div>
-          <div class="info-card__value">Sýnin</div>
-        </div>
-        <div class="info-card">
-          <div class="info-card__label">Lokalita</div>
-          <div class="info-card__value">Pezinok</div>
-        </div>
-        <div class="info-card">
-          <div class="info-card__label">Kraj</div>
-          <div class="info-card__value">Bratislavský</div>
-        </div>
-      </div>
+      <div class="info-grid" id="station-info"></div>
     </section>
 
     <footer class="footer">
-      <p>meteo.fajxo.sk · Osobná meteostanica Sýnin · Pezinok, Slovensko</p>
+      <p id="footer-text"></p>
     </footer>
   </div>
 
   <script>
     (function () {
-      var ECOWITT_SHARE = 'https://www.ecowitt.net/home/share?authorize=3JFD9G';
       var container = document.getElementById('conditions');
       var updatedEl = document.getElementById('updated-time');
+      var ecowittShareUrl = '';
 
       function val(v, decimals) {
         if (v === null || v === undefined) return '—';
         return decimals !== undefined ? Number(v).toFixed(decimals) : v;
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function renderStation(station) {
+        if (station.name) {
+          document.getElementById('station-name').textContent = station.name;
+          document.title = station.name + (station.location ? ' — ' + station.location : '');
+        }
+        if (station.location) {
+          document.getElementById('station-location-text').textContent = station.location;
+        }
+        if (station.coords) {
+          document.getElementById('station-coords').textContent = station.coords;
+        }
+        var infoGrid = document.getElementById('station-info');
+        var cards = '';
+        if (station.name) {
+          cards += '<div class="info-card"><div class="info-card__label">Názov</div><div class="info-card__value">' + escapeHtml(station.name) + '</div></div>';
+        }
+        if (station.location) {
+          cards += '<div class="info-card"><div class="info-card__label">Lokalita</div><div class="info-card__value">' + escapeHtml(station.location) + '</div></div>';
+        }
+        if (station.region) {
+          cards += '<div class="info-card"><div class="info-card__label">Kraj</div><div class="info-card__value">' + escapeHtml(station.region) + '</div></div>';
+        }
+        infoGrid.innerHTML = cards;
+
+        var footer = document.getElementById('footer-text');
+        var parts = [station.name, station.location].filter(Boolean);
+        footer.textContent = parts.join(' · ');
+      }
+
+      function renderServices(services) {
+        if (!services || services.length === 0) return;
+        var section = document.getElementById('services-section');
+        var wrap = document.getElementById('services');
+        var html = '';
+        var arrow = '<svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>';
+        for (var i = 0; i < services.length; i++) {
+          var s = services[i];
+          if (s.theme === 'ecowitt') ecowittShareUrl = s.url;
+          html += '<a href="' + escapeHtml(s.url) + '" class="service-card service-card--' + escapeHtml(s.theme) + '" target="_blank" rel="noopener noreferrer">' +
+            '<div class="service-card__icon">' + s.icon + '</div>' +
+            '<div class="service-card__content"><div class="service-card__name">' + escapeHtml(s.name) + '</div></div>' +
+            '<span class="service-card__arrow">' + arrow + '</span></a>';
+        }
+        wrap.innerHTML = html;
+        section.style.display = '';
       }
 
       function renderConditions(d) {
@@ -728,11 +718,12 @@
       }
 
       function renderError() {
-        container.innerHTML =
-          '<div class="conditions-error">' +
-            'Nepodarilo sa načítať aktuálne dáta.<br>' +
-            'Pozrite si živé údaje na <a href="' + ECOWITT_SHARE + '" target="_blank" rel="noopener noreferrer">Ecowitt dashboarde</a>.' +
-          '</div>';
+        var errorHtml = '<div class="conditions-error">Nepodarilo sa načítať aktuálne dáta.';
+        if (ecowittShareUrl) {
+          errorHtml += '<br>Pozrite si živé údaje na <a href="' + escapeHtml(ecowittShareUrl) + '" target="_blank" rel="noopener noreferrer">Ecowitt dashboarde</a>.';
+        }
+        errorHtml += '</div>';
+        container.innerHTML = errorHtml;
       }
 
       function getWeatherEmoji(temp) {
@@ -779,6 +770,8 @@
           return r.json();
         })
         .then(function (resp) {
+          if (resp.station) renderStation(resp.station);
+          if (resp.services) renderServices(resp.services);
           if (!resp.ok || !resp.data) throw new Error('no data');
           renderConditions(resp.data);
         })

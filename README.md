@@ -39,7 +39,8 @@ A PHP API endpoint that:
 1. Fetches sensor data from the [Ecowitt Open API](https://api.ecowitt.net/api/v3/device/real_time)
 2. Converts imperial units to metric (°F→°C, mph→km/h, inHg→hPa, in→mm)
 3. Caches responses to disk (configurable TTL, default 60 s)
-4. Returns a JSON response: `{ "ok": true, "data": { ... } }`
+4. Serves station metadata and weather service links from config
+5. Returns a JSON response: `{ "ok": true, "data": { ... }, "station": { ... }, "services": [ ... ] }`
 
 ### Configuration
 
@@ -52,11 +53,24 @@ cp config.sample.php config.php
 Edit `config.php`:
 
 ```php
+// Ecowitt API credentials
 define('ECOWITT_APP_KEY', 'your_application_key');
 define('ECOWITT_API_KEY', 'your_api_key');
 define('ECOWITT_MAC',     'AA:BB:CC:DD:EE:FF');
 define('CACHE_TTL', 60);
 define('CACHE_DIR', __DIR__ . '/cache');
+
+// Station info (displayed on the dashboard)
+define('STATION_NAME', 'My Weather Station');
+define('STATION_LOCATION', 'City, Country');
+define('STATION_COORDS', '48°00\'00" N  17°00\'00" E · 200 m a.s.l.');
+define('STATION_REGION', 'Region');
+
+// Weather service URLs (leave empty to hide from dashboard)
+define('URL_WEATHERCLOUD', 'https://app.weathercloud.net/d1234567890');
+define('URL_WUNDERGROUND', 'https://www.wunderground.com/dashboard/pws/IXXXXXX');
+define('URL_WINDY',        'https://www.windy.com/station/pws-XXXXXXX');
+define('URL_ECOWITT',      'https://www.ecowitt.net/home/share?authorize=XXXXXX');
 ```
 
 The `cache/` directory must be writable by the web server.

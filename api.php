@@ -161,9 +161,30 @@ function fetchEcowitt(): ?array
 // Build response
 $data = fetchEcowitt();
 
+$services = [];
+if (defined('URL_WEATHERCLOUD') && URL_WEATHERCLOUD !== '') {
+    $services[] = ['name' => 'Weathercloud', 'url' => URL_WEATHERCLOUD, 'icon' => '☁️', 'theme' => 'weathercloud'];
+}
+if (defined('URL_WUNDERGROUND') && URL_WUNDERGROUND !== '') {
+    $services[] = ['name' => 'Weather Underground', 'url' => URL_WUNDERGROUND, 'icon' => '🌍', 'theme' => 'wunderground'];
+}
+if (defined('URL_WINDY') && URL_WINDY !== '') {
+    $services[] = ['name' => 'Windy', 'url' => URL_WINDY, 'icon' => '🌬️', 'theme' => 'windy'];
+}
+if (defined('URL_ECOWITT') && URL_ECOWITT !== '') {
+    $services[] = ['name' => 'Ecowitt', 'url' => URL_ECOWITT, 'icon' => '📊', 'theme' => 'ecowitt'];
+}
+
 $response = [
     'ok'   => $data !== null,
     'data' => $data,
+    'station' => [
+        'name'     => defined('STATION_NAME') ? STATION_NAME : '',
+        'location' => defined('STATION_LOCATION') ? STATION_LOCATION : '',
+        'coords'   => defined('STATION_COORDS') ? STATION_COORDS : '',
+        'region'   => defined('STATION_REGION') ? STATION_REGION : '',
+    ],
+    'services' => $services,
 ];
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
