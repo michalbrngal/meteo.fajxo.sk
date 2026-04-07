@@ -161,3 +161,9 @@ The template uses a single HTTP agent item (`ecowitt.raw`) as the master item, w
 └── zabbix/
     └── zbx_export_templates.yaml  # Zabbix monitoring template
 ```
+
+## License
+
+This project is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). You are free to share and adapt it for non-commercial purposes with attribution.
+
+The `foshkplugin/` directory contains third-party code ([FOSHKplugin](https://github.com/hoetzgit/FOSHKplugin)) which may be subject to its own license terms.
