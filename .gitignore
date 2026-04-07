@@ -1,1 +1,10 @@
 config.php
+cache/*.json
+cache/*.tmp
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

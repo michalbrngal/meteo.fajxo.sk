@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /index.html
+Allow: /favicon.svg
+Disallow: /api.php
+Disallow: /cache/
+Disallow: /foshkplugin/
+Disallow: /zabbix/
+
+Sitemap: https://meteo.fajxo.sk/sitemap.xml
