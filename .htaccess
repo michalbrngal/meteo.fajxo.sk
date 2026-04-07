@@ -1,12 +1,14 @@
 # Protect sensitive files
-<FilesMatch "^(config\.php)$">
+<FilesMatch "^(config\.php|config\.sample\.php|README\.md|\.gitignore|\.htaccess)$">
     Require all denied
 </FilesMatch>
 
-# Protect cache directory
+# Protect non-public directories
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^cache/ - [F,L]
+    RewriteRule ^foshkplugin/ - [F,L]
+    RewriteRule ^zabbix/ - [F,L]
 </IfModule>
 
 # Force HTTPS
