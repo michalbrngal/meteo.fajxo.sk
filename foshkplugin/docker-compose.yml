@@ -1,0 +1,27 @@
+services:
+  foshkplugin:
+    build:
+      context: .
+      args:
+        FOSHKPLUGIN_VERSION: "0.0.10BetaWN52"
+    container_name: foshkplugin
+    image: foshkplugin:0.0.10BetaWN52
+    restart: unless-stopped
+
+    network_mode: host
+
+    ports:
+      - "8080:8080"       # HTTP push receiver (GW3000A posts here)
+
+    volumes:
+      # Config mounted from host, need write access for plugin to update config if needed
+      - <path_to_docker_container_storage_directory>/conf:/opt/foshkplugin/conf
+      # Logs remain writable on host
+      - <path_to_docker_container_storage_directory>/logs:/opt/foshkplugin/logs
+
+    environment:
+      - LBPCONFIG=/opt/foshkplugin/conf
+
+    # Run as non-root for security
+    user: "1000:1000"
+
