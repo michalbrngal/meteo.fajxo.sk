@@ -1,0 +1,1306 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: a9d007212ef24c65aa8016c6ecf77037
+      name: Templates/Weather
+  templates:
+    - uuid: 38e1734999e5469cb1cf049cb154585a
+      template: Template_Ecowitt_GW_HTTP_JSON
+      name: 'Template Ecowitt GW (HTTP JSON)'
+      groups:
+        - name: Templates/Weather
+      items:
+        - uuid: aae0641e77dc4d1ebbc17ad434ae64c6
+          name: 'Ecowitt: heap'
+          type: DEPENDENT
+          key: ecowitt.debug.heap
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.debug[0].heap'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: ae0842cef09e4f29868f6c648c1ae0f2
+          name: 'Ecowitt: runtime'
+          type: DEPENDENT
+          key: ecowitt.debug.runtime
+          delay: '0'
+          units: s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.debug[0].runtime'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 9df70430db7945648cd313858d08f2ed
+          name: 'Ecowitt: user interval'
+          type: DEPENDENT
+          key: ecowitt.debug.usr_interval
+          delay: '0'
+          units: s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.debug[0].usr_interval'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 24acb0e48a37422d9e038f3a88fefe59
+          name: 'Ecowitt: indoor humidity (WH25)'
+          type: DEPENDENT
+          key: ecowitt.in.humi
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.wh25[0].inhumi'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 36cc084715fb4b318081f247919e626a
+          name: 'Ecowitt: indoor temperature (WH25)'
+          type: DEPENDENT
+          key: ecowitt.in.temp
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.wh25[0].intemp'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a76e888952074510a100e7cc416b7900
+          name: 'Ecowitt: lightning sensor battery'
+          type: DEPENDENT
+          key: ecowitt.lightning.batt
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.lightning[0].battery'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: af520d8c13f047b5b860002e6cebbcec
+          name: 'Ecowitt: lightning count'
+          type: DEPENDENT
+          key: ecowitt.lightning.count
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.lightning[0].count'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 35f086938a654e11a58f627264f4f500
+          name: 'Ecowitt: dew point (id 0x03)'
+          type: DEPENDENT
+          key: ecowitt.out.dewpoint
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x03")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 1f7153001328461d9a7ed6fee60c1161
+          name: 'Ecowitt: outdoor humidity'
+          type: DEPENDENT
+          key: ecowitt.out.humi
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x07")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 3e51d74e6d8744c7be3a306b48c5106d
+          name: 'Ecowitt: outdoor temperature'
+          type: DEPENDENT
+          key: ecowitt.out.temp
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x02")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: d932667085d64e9ba4881344786e2b64
+          name: 'Ecowitt: PM2.5 sensor battery (ch1)'
+          type: DEPENDENT
+          key: ecowitt.pm25.batt.ch1
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_pm25[?(@.channel=="1")].battery.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 04eeec175d2f44d8b85b8ac3f131bb24
+          name: 'Ecowitt: PM2.5 (ch1)'
+          type: DEPENDENT
+          key: ecowitt.pm25.ch1
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_pm25[?(@.channel=="1")].PM25.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a6b9344b67cf4db58d7770e4a64e360b
+          name: 'Ecowitt: PM2.5 24H avg (ch1)'
+          type: DEPENDENT
+          key: ecowitt.pm25_24h.ch1
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_pm25[?(@.channel=="1")].PM25_24H.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f3f91144ca7e46aaab6a240771923e29
+          name: 'Ecowitt: PM2.5 24H AQI (ch1)'
+          type: DEPENDENT
+          key: ecowitt.pm25_24h_aqi.ch1
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_pm25[?(@.channel=="1")].PM25_24HAQI.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: c7451a03673243a194ede18cebd6ff71
+          name: 'Ecowitt: PM2.5 AQI (ch1)'
+          type: DEPENDENT
+          key: ecowitt.pm25_aqi.ch1
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_pm25[?(@.channel=="1")].PM25_RealAQI.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: c1a5343d5dd74b218935c0b1abcdc04c
+          name: 'Ecowitt: pressure absolute (WH25)'
+          type: DEPENDENT
+          key: ecowitt.press.abs
+          delay: '0'
+          value_type: FLOAT
+          units: HPa
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.wh25[0].abs'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 8d76021f20a14177a8431da8710309b3
+          name: 'Ecowitt: pressure (from common_list id 5)'
+          type: DEPENDENT
+          key: ecowitt.press.common.hpa
+          delay: '0'
+          value_type: FLOAT
+          units: HPa
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="5")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+            - type: MULTIPLIER
+              parameters:
+                - '10'
+          master_item:
+            key: ecowitt.raw
+        - uuid: 408d40111c9649a7b68d2cdd5354a802
+          name: 'Ecowitt: pressure relative (WH25)'
+          type: DEPENDENT
+          key: ecowitt.press.rel
+          delay: '0'
+          value_type: FLOAT
+          units: HPa
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.wh25[0].rel'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a14ddf37f4c94f55b02faf67fd17e7a8
+          name: 'Ecowitt: rain daily (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.day
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x10")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: ed4a916c5493444895203e9d4072a36c
+          name: 'Ecowitt: rain event (id 0x7C)'
+          type: DEPENDENT
+          key: ecowitt.rain.event
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x7C")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 6f326111a59941aca166a5ab17b97edf
+          name: 'Ecowitt: rain monthly (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.month
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x12")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 79da1c18f1ea4e31826748163b008008
+          name: 'Ecowitt: rain rate (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.rate
+          delay: '0'
+          value_type: FLOAT
+          units: mm/h
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x0E")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f3fde71a05ff4543a042de5f0c731935
+          name: 'Ecowitt: rain total (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.total
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x0D")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 63e253428e1d4c47893f80b56592807a
+          name: 'Ecowitt: rain weekly (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.week
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x11")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: eebaeec16bbd472bb9f4eb6ca88e2604
+          name: 'Ecowitt: rain yearly (piezo)'
+          type: DEPENDENT
+          key: ecowitt.rain.year
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x13")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 081d6625f22a4ee3b037caaf9c4b2116
+          name: 'Ecowitt: raw JSON (preprocess only)'
+          type: HTTP_AGENT
+          key: ecowitt.raw
+          delay: 60s
+          history: 0d
+          value_type: CHAR
+          trends: '0'
+          timeout: 10s
+          url: '{$ECOWITT.URL}'
+        - uuid: d9bf6dc970d2495dbcf7a0abd707ffe3
+          name: 'Ecowitt: solar radiation'
+          type: DEPENDENT
+          key: ecowitt.solar.wm2
+          delay: '0'
+          value_type: FLOAT
+          units: W/m²
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x15")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 05d0cda355ff467cb76d81110d32d4c0
+          name: 'Ecowitt: UV index'
+          type: DEPENDENT
+          key: ecowitt.uv.index
+          delay: '0'
+          value_type: FLOAT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x17")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 7dc9672b1d634c23b3a793985c03ae60
+          name: 'Ecowitt: WH40H rain sensor battery'
+          type: DEPENDENT
+          key: ecowitt.wh40.battery
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x13")].battery.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 222eac90e4f141128ecdd91f83a6b095
+          name: 'Ecowitt: rain daily (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.day
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x10")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 95f8b04cea554816b96dbd033b44810f
+          name: 'Ecowitt: rain event (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.event
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x7C")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: b6c2f1c28608487a89fd78212e2a6a3e
+          name: 'Ecowitt: rain monthly (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.month
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x12")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f7be700aa2b6478b87c36be6352109f9
+          name: 'Ecowitt: rain rate (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.rate
+          delay: '0'
+          value_type: FLOAT
+          units: mm/h
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x0E")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 9e86d411077e4876acd35d00dd4d1e78
+          name: 'Ecowitt: rain total (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.total
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x0D")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 87996fc2feca45a2b8f938aae60f08a4
+          name: 'Ecowitt: rain weekly (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.week
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x11")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a92183f59e1541c3bc0444a4a695b1f1
+          name: 'Ecowitt: rain yearly (WH40H)'
+          type: DEPENDENT
+          key: ecowitt.wh40.rain.year
+          delay: '0'
+          value_type: FLOAT
+          units: mm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x13")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 16f446afa0ed49708d10da75b92f1c8d
+          name: 'Ecowitt: WH40H rain sensor voltage'
+          type: DEPENDENT
+          key: ecowitt.wh40.voltage
+          delay: '0'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rain[?(@.id=="0x13")].voltage.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f33f004fc12645fcab3ce1aefea4e1a1
+          name: 'Ecowitt: wind direction'
+          type: DEPENDENT
+          key: ecowitt.wind.dir
+          delay: '0'
+          value_type: FLOAT
+          units: °
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x0A")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 4396e5c6bd9d4ee48efb5c042ab12972
+          name: 'Ecowitt: wind gust'
+          type: DEPENDENT
+          key: ecowitt.wind.gust
+          delay: '0'
+          value_type: FLOAT
+          units: m/s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x19")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f5acbffc09a140bbb2f98c35d80ac485
+          name: 'Ecowitt: wind speed'
+          type: DEPENDENT
+          key: ecowitt.wind.speed
+          delay: '0'
+          value_type: FLOAT
+          units: m/s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x0B")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f1dc99f5baae419ea84d5f27c0003430
+          name: 'Ecowitt: wind speed (avg)'
+          type: DEPENDENT
+          key: ecowitt.wind.speed_avg
+          delay: '0'
+          value_type: FLOAT
+          units: m/s
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x0C")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 240638d7befe4d12aa7e40c56cbfb1b1
+          name: 'Ecowitt: WN38 battery'
+          type: DEPENDENT
+          key: ecowitt.wn38.battery
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0xA1")].battery.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 65cddd0eaf0e4acea40dccfa81979596
+          name: 'Ecowitt: WN38 ch1 temperature (BGT)'
+          type: DEPENDENT
+          key: ecowitt.wn38.temp.ch1
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0xA1")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f5bdb866eb6f46729c49e32350d4c673
+          name: 'Ecowitt: WN38 ch2 temperature (WBGT)'
+          type: DEPENDENT
+          key: ecowitt.wn38.temp.ch2
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0xA2")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 8850e1fde0084ff1a1f55c34a18a26e8
+          name: 'Ecowitt: WN38 voltage'
+          type: DEPENDENT
+          key: ecowitt.wn38.voltage
+          delay: '0'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0xA1")].voltage.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 56169f8ba5794c049e33221d3e42bc82
+          name: 'Ecowitt: WS90 rain sensor battery'
+          type: DEPENDENT
+          key: ecowitt.ws90.battery
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x13")].battery.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: aa188bb2326143bb8ffca19e2f72b195
+          name: 'Ecowitt: WS90 capacitor voltage'
+          type: DEPENDENT
+          key: ecowitt.ws90.cap_volt
+          delay: '0'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x13")].ws90cap_volt.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 3ab4c74d1ea149eaa3d0826fca170384
+          name: 'Ecowitt: WS90 version'
+          type: DEPENDENT
+          key: ecowitt.ws90.ver
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x13")].ws90_ver.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 4c20b0d6b22d465c989dce11c60f8098
+          name: 'Ecowitt: WS90 rain sensor voltage'
+          type: DEPENDENT
+          key: ecowitt.ws90.voltage
+          delay: '0'
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="0x13")].voltage.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: f9693d98fd4c4404a9377cfcf02cda6c
+          name: 'Ecowitt: feels like temperature (id 3)'
+          type: DEPENDENT
+          key: ecowitt.out.feelslike
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="3")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 489642abf16343a4bab1ad348b84250d
+          name: 'Ecowitt: sensor 0x6D'
+          type: DEPENDENT
+          key: ecowitt.sensor.0x6d
+          delay: '0'
+          value_type: FLOAT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.common_list[?(@.id=="0x6D")].val.first()'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: c83b8233ad7649c09ee2d39c906f9528
+          name: 'Ecowitt: piezo rain sensor status'
+          type: DEPENDENT
+          key: ecowitt.piezo.status
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.piezoRain[?(@.id=="srain_piezo")].val.first()'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: fdb1b0f7c34e498eba4ed5ea392bc500
+          name: 'Ecowitt: lightning distance'
+          type: DEPENDENT
+          key: ecowitt.lightning.distance
+          delay: '0'
+          value_type: FLOAT
+          units: km
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.lightning[0].distance'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 967d6c1c5b984780b47c618e98d92035
+          name: 'Ecowitt: lightning last strike time'
+          type: DEPENDENT
+          key: ecowitt.lightning.time
+          delay: '0'
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.lightning[0].timestamp'
+          master_item:
+            key: ecowitt.raw
+        - uuid: e42e75498d7048bf99cedd984eb0888b
+          name: 'Ecowitt: CO2 sensor temperature'
+          type: DEPENDENT
+          key: ecowitt.co2.temp
+          delay: '0'
+          value_type: FLOAT
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].temp'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 7ab2b0a50ede41438e85631f41b2b2c9
+          name: 'Ecowitt: CO2 sensor humidity'
+          type: DEPENDENT
+          key: ecowitt.co2.humi
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].humidity'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 876339330818456fa5b180f551cafda7
+          name: 'Ecowitt: CO2 sensor PM2.5'
+          type: DEPENDENT
+          key: ecowitt.co2.pm25
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM25'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 82fa0c738df54ba89f983933f4b4b9c6
+          name: 'Ecowitt: CO2 sensor PM2.5 AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm25_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM25_RealAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 84ef880fb63241c0912d56124524ff10
+          name: 'Ecowitt: CO2 sensor PM2.5 24H AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm25_24h_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM25_24HAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 2888e148bc83408682ff19d9c8dc2b88
+          name: 'Ecowitt: CO2 sensor PM2.5 24H avg'
+          type: DEPENDENT
+          key: ecowitt.co2.pm25_24h
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM25_24H'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 7ed9b320d1894b51994bf98be8eba133
+          name: 'Ecowitt: CO2 sensor PM10'
+          type: DEPENDENT
+          key: ecowitt.co2.pm10
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM10'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 7d81fd508cf5461a88f3e1ae50cfe618
+          name: 'Ecowitt: CO2 sensor PM10 AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm10_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM10_RealAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 07d165d6d13140228800f961b509e91d
+          name: 'Ecowitt: CO2 sensor PM10 24H AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm10_24h_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM10_24HAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 2a27b7bb3b3341d9b4994d602eb2126c
+          name: 'Ecowitt: CO2 sensor PM10 24H avg'
+          type: DEPENDENT
+          key: ecowitt.co2.pm10_24h
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM10_24H'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 2210a1f431494a6fb59891c0fbcbd189
+          name: 'Ecowitt: CO2 sensor PM1.0'
+          type: DEPENDENT
+          key: ecowitt.co2.pm1
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM1'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 8ecd1c13bc3f4ee18442886c4b91f039
+          name: 'Ecowitt: CO2 sensor PM1.0 AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm1_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM1_RealAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 784ea70e971845b29b3634092c03b7c1
+          name: 'Ecowitt: CO2 sensor PM1.0 24H AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm1_24h_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM1_24HAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 00d14198c10d4b7a95a3ec3080d63b39
+          name: 'Ecowitt: CO2 sensor PM1.0 24H avg'
+          type: DEPENDENT
+          key: ecowitt.co2.pm1_24h
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM1_24H'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 9394a07977e34efb9e74e1606186da2f
+          name: 'Ecowitt: CO2 sensor PM4.0'
+          type: DEPENDENT
+          key: ecowitt.co2.pm4
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM4'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 36847421848e47c38aabec5891b70da1
+          name: 'Ecowitt: CO2 sensor PM4.0 AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm4_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM4_RealAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a849cb14c639451cbd5b51e28ab8cae3
+          name: 'Ecowitt: CO2 sensor PM4.0 24H AQI'
+          type: DEPENDENT
+          key: ecowitt.co2.pm4_24h_aqi
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM4_24HAQI'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: b241b3c730784635b15f38b5795eb327
+          name: 'Ecowitt: CO2 sensor PM4.0 24H avg'
+          type: DEPENDENT
+          key: ecowitt.co2.pm4_24h
+          delay: '0'
+          value_type: FLOAT
+          units: µg/m³
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].PM4_24H'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 06d48ec13efc4927802b459d697e7291
+          name: 'Ecowitt: CO2 level'
+          type: DEPENDENT
+          key: ecowitt.co2.co2
+          delay: '0'
+          value_type: FLOAT
+          units: ppm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].CO2'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: a1849f0e31ae497cb51cbed7dda5e44c
+          name: 'Ecowitt: CO2 level 24H avg'
+          type: DEPENDENT
+          key: ecowitt.co2.co2_24h
+          delay: '0'
+          value_type: FLOAT
+          units: ppm
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].CO2_24H'
+            - type: REGEX
+              parameters:
+                - '(-?\d+(\.\d+)?)'
+                - \1
+          master_item:
+            key: ecowitt.raw
+        - uuid: 0922059c5767491db15949aae26d0a07
+          name: 'Ecowitt: CO2 sensor battery'
+          type: DEPENDENT
+          key: ecowitt.co2.battery
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.co2[0].battery'
+            - type: REGEX
+              parameters:
+                - (\d+)
+                - \1
+          master_item:
+            key: ecowitt.raw
+      discovery_rules:
+        - uuid: 7bec8fc101b84842b1b38b38f3b26360
+          name: 'Ecowitt: soil sensors discovery'
+          type: DEPENDENT
+          key: ecowitt.soil.discovery
+          delay: '0'
+          item_prototypes:
+            - uuid: bf3916bf3a0c4262a97ab5e3a082211f
+              name: 'Soil {#CH} ({#NAME}): battery'
+              type: DEPENDENT
+              key: 'ecowitt.soil.batt[{#CH}]'
+              delay: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.ch_soil[?(@.channel=="{#CH}")].battery.first()'
+                - type: REGEX
+                  parameters:
+                    - (\d+)
+                    - \1
+              master_item:
+                key: ecowitt.raw
+            - uuid: b4ce7dc2400f458f890c0a83bedaf2a4
+              name: 'Soil {#CH} ({#NAME}): humidity'
+              type: DEPENDENT
+              key: 'ecowitt.soil.humi[{#CH}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.ch_soil[?(@.channel=="{#CH}")].humidity.first()'
+                - type: REGEX
+                  parameters:
+                    - '(-?\d+(\.\d+)?)'
+                    - \1
+              master_item:
+                key: ecowitt.raw
+            - uuid: 9c3ddbe0fbc2452eaa70089303269c57
+              name: 'Soil {#CH} ({#NAME}): voltage'
+              type: DEPENDENT
+              key: 'ecowitt.soil.voltage[{#CH}]'
+              delay: '0'
+              value_type: FLOAT
+              units: V
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.ch_soil[?(@.channel=="{#CH}")].voltage.first()'
+                - type: REGEX
+                  parameters:
+                    - '(-?\d+(\.\d+)?)'
+                    - \1
+              master_item:
+                key: ecowitt.raw
+          master_item:
+            key: ecowitt.raw
+          lld_macro_paths:
+            - lld_macro: '{#CH}'
+              path: $.channel
+            - lld_macro: '{#NAME}'
+              path: $.name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.ch_soil[*]'
+      macros:
+        - macro: '{$ECOWITT.URL}'
+          value: 'http://127.0.0.1/get_livedata_info'
+          description: 'Ecowitt gateway livedata URL (override on host)'
