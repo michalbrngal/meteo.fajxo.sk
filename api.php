@@ -118,6 +118,15 @@ function inToMm(?string $in): ?float
 }
 
 /**
+ * Convert miles to km.
+ */
+function miToKm(?string $mi): ?float
+{
+    if ($mi === null) return null;
+    return round((float)$mi * 1.60934, 1);
+}
+
+/**
  * Fetch all sensor data from Ecowitt Open API.
  */
 function fetchEcowitt(): ?array
@@ -164,6 +173,9 @@ function fetchEcowitt(): ?array
         'uv'             => isset($d['solar_and_uvi']['uvi']['value']) ? (int)$d['solar_and_uvi']['uvi']['value'] : null,
         'pm25'           => isset($d['pm25_ch1']['pm25']['value']) ? (float)$d['pm25_ch1']['pm25']['value'] : null,
         'pm25aqi'        => isset($d['pm25_ch1']['real_time_aqi']['value']) ? (float)$d['pm25_ch1']['real_time_aqi']['value'] : null,
+        'lightningTime'  => isset($d['lightning']['timestamp']['value']) ? (int)$d['lightning']['timestamp']['value'] : null,
+        'lightningCount' => isset($d['lightning']['count']['value']) ? (int)$d['lightning']['count']['value'] : null,
+        'lightningDist'  => miToKm($d['lightning']['distance']['value'] ?? null),
         'obsTime'        => isset($d['outdoor']['temperature']['time']) ? (int)$d['outdoor']['temperature']['time'] : null,
     ];
 

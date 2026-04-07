@@ -693,6 +693,24 @@
             '<div class="condition-card__value">' + renderPm25Value(d) + '</div>' +
             '<div class="condition-card__label">PM2.5</div>' +
             renderPm25Aqi(d) +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">⚡</div>' +
+            '<div class="condition-card__value">' + renderLightningTime(d) + '</div>' +
+            '<div class="condition-card__label">Posledný blesk</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">🔢</div>' +
+            '<div class="condition-card__value">' + val(d.lightningCount) + '</div>' +
+            '<div class="condition-card__label">Počet bleskov</div>' +
+          '</div>' +
+
+          '<div class="condition-card">' +
+            '<div class="condition-card__icon" aria-hidden="true">📏</div>' +
+            '<div class="condition-card__value">' + (d.lightningDist !== null && d.lightningDist !== undefined ? val(d.lightningDist, 1) + '<span class="condition-card__unit"> km</span>' : '—') + '</div>' +
+            '<div class="condition-card__label">Vzdialenosť blesku</div>' +
           '</div>';
 
         if (d.obsTime) {
@@ -709,6 +727,15 @@
           return '—<span class="condition-card__unit"> µg/m³</span>';
         }
         return Number(d.pm25).toFixed(1) + '<span class="condition-card__unit"> µg/m³</span>';
+      }
+
+      function renderLightningTime(d) {
+        if (d.lightningTime === null || d.lightningTime === undefined) return '—';
+        var diff = Math.floor(Date.now() / 1000) - d.lightningTime;
+        if (diff < 60) return 'Práve teraz';
+        if (diff < 3600) return Math.floor(diff / 60) + ' min';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' hod';
+        return Math.floor(diff / 86400) + ' d';
       }
 
       function renderPm25Aqi(d) {
