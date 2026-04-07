@@ -179,7 +179,7 @@ $data = fetchEcowitt();
  */
 function isValidServiceUrl(string $url): bool
 {
-    return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with($url, 'https://');
+    return (bool) filter_var($url, FILTER_VALIDATE_URL) && strpos($url, 'https://') === 0;
 }
 
 $services = [];
