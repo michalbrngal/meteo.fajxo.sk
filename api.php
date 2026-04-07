@@ -2,7 +2,20 @@
 
 declare(strict_types=1);
 
+// Suppress error output to prevent path/info leaks
+ini_set('display_errors', '0');
+error_reporting(0);
+
 require_once __DIR__ . '/config.php';
+
+// Only allow GET requests
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    header('Allow: GET');
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false, 'error' => 'Method not allowed']);
+    exit;
+}
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=' . CACHE_TTL);
@@ -161,17 +174,25 @@ function fetchEcowitt(): ?array
 // Build response
 $data = fetchEcowitt();
 
+/**
+ * Validate that a URL uses https:// scheme only.
+ */
+function isValidServiceUrl(string $url): bool
+{
+    return (bool) filter_var($url, FILTER_VALIDATE_URL) && str_starts_with($url, 'https://');
+}
+
 $services = [];
-if (defined('URL_WEATHERCLOUD') && URL_WEATHERCLOUD !== '') {
+if (defined('URL_WEATHERCLOUD') && URL_WEATHERCLOUD !== '' && isValidServiceUrl(URL_WEATHERCLOUD)) {
     $services[] = ['name' => 'Weathercloud', 'url' => URL_WEATHERCLOUD, 'icon' => '☁️', 'theme' => 'weathercloud'];
 }
-if (defined('URL_WUNDERGROUND') && URL_WUNDERGROUND !== '') {
+if (defined('URL_WUNDERGROUND') && URL_WUNDERGROUND !== '' && isValidServiceUrl(URL_WUNDERGROUND)) {
     $services[] = ['name' => 'Weather Underground', 'url' => URL_WUNDERGROUND, 'icon' => '🌍', 'theme' => 'wunderground'];
 }
-if (defined('URL_WINDY') && URL_WINDY !== '') {
+if (defined('URL_WINDY') && URL_WINDY !== '' && isValidServiceUrl(URL_WINDY)) {
     $services[] = ['name' => 'Windy', 'url' => URL_WINDY, 'icon' => '🌬️', 'theme' => 'windy'];
 }
-if (defined('URL_ECOWITT') && URL_ECOWITT !== '') {
+if (defined('URL_ECOWITT') && URL_ECOWITT !== '' && isValidServiceUrl(URL_ECOWITT)) {
     $services[] = ['name' => 'Ecowitt', 'url' => URL_ECOWITT, 'icon' => '📊', 'theme' => 'ecowitt'];
 }
 

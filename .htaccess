@@ -3,6 +3,12 @@
     Require all denied
 </FilesMatch>
 
+# Disable directory listings
+Options -Indexes
+
+# Hide server version
+ServerSignature Off
+
 # Protect non-public directories
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -41,4 +47,20 @@
 
     # Content Security Policy
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+</IfModule>
+
+# Rate limiting (requires mod_ratelimit)
+# Throttles response bandwidth per connection to prevent abuse
+<IfModule mod_ratelimit.c>
+    # API endpoint — limit to 50 KB/s per connection (JSON responses are small, this stops abuse)
+    <Location /api.php>
+        SetOutputFilter RATE_LIMIT
+        SetEnv rate-limit 50
+    </Location>
+
+    # Static assets — allow higher throughput (400 KB/s)
+    <Location /index.html>
+        SetOutputFilter RATE_LIMIT
+        SetEnv rate-limit 400
+    </Location>
 </IfModule>
