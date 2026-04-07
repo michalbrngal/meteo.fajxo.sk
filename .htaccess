@@ -53,14 +53,14 @@ ServerSignature Off
 # Throttles response bandwidth per connection to prevent abuse
 <IfModule mod_ratelimit.c>
     # API endpoint — limit to 50 KB/s per connection (JSON responses are small, this stops abuse)
-    <Location /api.php>
+    <If "%{REQUEST_URI} =~ m#/api\.php$#">
         SetOutputFilter RATE_LIMIT
         SetEnv rate-limit 50
-    </Location>
+    </If>
 
     # Static assets — allow higher throughput (400 KB/s)
-    <Location /index.html>
+    <If "%{REQUEST_URI} =~ m#/index\.html$#">
         SetOutputFilter RATE_LIMIT
         SetEnv rate-limit 400
-    </Location>
+    </If>
 </IfModule>
